@@ -1,0 +1,7 @@
+C:\webShells\WebShells\WebUtils\bin\WebUtils.dll
+C:\webShells\WebShells\WebUtils\bin\WebUtils.pdb
+C:\webShells\WebShells\WebUtils\obj\Debug\WebUtils.csprojAssemblyReference.cache
+C:\webShells\WebShells\WebUtils\obj\Debug\WebUtils.csproj.CoreCompileInputs.cache
+C:\webShells\WebShells\WebUtils\obj\Debug\WebUtils.dll
+C:\webShells\WebShells\WebUtils\obj\Debug\WebUtils.pdb
+C:\webShells\WebShells\WebUtils\bin\WebUtils.dll.config
