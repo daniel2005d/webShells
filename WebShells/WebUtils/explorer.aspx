@@ -32,7 +32,13 @@
             }
             else
             {
+                try{
                 this.BindDrivers();
+
+}
+catch(Exception ex){
+Response.Write(ex.ToString());
+}
             }
         }
     }
