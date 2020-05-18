@@ -65,7 +65,7 @@ Response.Write(ex.ToString());
         foreach (string d in drivers)
         {
             string b64 = Convert.ToBase64String(Encoding.Default.GetBytes(d));
-            li += string.Format("<li class='list-group-item'><a href='explorer.aspx?file={0}'> {1}</a></li>", b64, d);
+            li += string.Format("<li class='list-group-item'><a href='{2}?file={0}'> {1}</a></li>", b64, d, Request.Url.ToString());
 
         }
 
@@ -81,7 +81,7 @@ Response.Write(ex.ToString());
         if (parentinfo != null)
         {
             b64 = Convert.ToBase64String(Encoding.Default.GetBytes(parentinfo.FullName));
-            li =string.Format( "<li class='list-group-item list-group-item-action'><a href='explorer.aspx?file={0}'> ..</a></li>", b64);
+            li =string.Format( "<li class='list-group-item list-group-item-action'><a href='{1}?file={0}'> ..</a></li>", b64, Request.Url.ToString());
         }
 
         this.litUl.Text += "<ul class='list-group' >{0}</ul>";
@@ -93,7 +93,7 @@ Response.Write(ex.ToString());
 
             b64 = Convert.ToBase64String(Encoding.Default.GetBytes(d));
 
-            li += string.Format("<li class='list-group-item list-group-item-action'><a href='explorer.aspx?file={0}'> {1}</a></li>", b64, dinfo.Name);
+            li += string.Format("<li class='list-group-item list-group-item-action'><a href='{2}?file={0}'> {1}</a></li>", b64, dinfo.Name, Request.Url.ToString());
 
         }
 
