@@ -5,3 +5,10 @@ C:\webShells\WebShells\WebUtils\obj\Debug\WebUtils.csproj.CoreCompileInputs.cach
 C:\webShells\WebShells\WebUtils\obj\Debug\WebUtils.dll
 C:\webShells\WebShells\WebUtils\obj\Debug\WebUtils.pdb
 C:\webShells\WebShells\WebUtils\bin\WebUtils.dll.config
+H:\webshells\WebShells\WebUtils\bin\WebUtils.dll.config
+H:\webshells\WebShells\WebUtils\bin\WebUtils.dll
+H:\webshells\WebShells\WebUtils\bin\WebUtils.pdb
+H:\webshells\WebShells\WebUtils\obj\Debug\WebUtils.csprojAssemblyReference.cache
+H:\webshells\WebShells\WebUtils\obj\Debug\WebUtils.csproj.CoreCompileInputs.cache
+H:\webshells\WebShells\WebUtils\obj\Debug\WebUtils.dll
+H:\webshells\WebShells\WebUtils\obj\Debug\WebUtils.pdb
