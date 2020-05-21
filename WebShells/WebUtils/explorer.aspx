@@ -68,7 +68,7 @@
         foreach (string d in drivers)
         {
             string b64 = Convert.ToBase64String(Encoding.Default.GetBytes(d));
-            li += string.Format("<li class='list-group-item'><a href='{2}?file={0}'> {1}</a></li>", b64, d, Request.Url.ToString());
+            li += string.Format("<li class='list-group-item'><a href='{2}?file={0}'> {1}</a></li>", b64, d, Request.Url.AbsolutePath.ToString());
 
         }
 
@@ -124,7 +124,7 @@
             {
                 string b64 = Convert.ToBase64String(Encoding.Default.GetBytes(s));
                 FileInfo fn = new FileInfo(s);
-                li += string.Format("<li class='list-group-item'><a href='explorer.aspx?xx={0}'> {1}</a></li>", b64, fn.Name);
+                li += string.Format("<li class='list-group-item'><a href='{2}?xx={0}'> {1}</a></li>", b64, fn.Name, Request.Url.AbsolutePath.ToString());
 
             }
             catch (Exception ex)
