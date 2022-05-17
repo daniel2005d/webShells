@@ -13,10 +13,5 @@ namespace WebUtils
         {
 
         }
-
-        protected void grvFiles_RowCommand(object sender, GridViewCommandEventArgs e)
-        {
-
-        }
     }
 }

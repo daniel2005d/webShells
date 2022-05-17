@@ -30,17 +30,24 @@
             this.ListBox1.Items.Add(connection.ConnectionString);
         }
     }
+
+    DataTable GetData()
+    {
+        SqlConnection con = new SqlConnection(this.txtConnection.Text);
+        SqlCommand cmd = new SqlCommand(this.txtQuery.Text, con);
+        //cmd.Parameters.AddWithValue("@id",Your parameters value if any);
+        //cmd.CommandType = CommandType.Text;
+        DataTable dt = new DataTable();
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+        da.Fill(dt);
+        con.Close();
+        return dt;
+    }
     void ExcuteCmd()
     {
         try
         {
-            SqlConnection con = new SqlConnection(this.txtConnection.Text);
-            SqlCommand cmd = new SqlCommand(this.txtQuery.Text, con);
-            //cmd.Parameters.AddWithValue("@id",Your parameters value if any);
-            //cmd.CommandType = CommandType.Text;
-            DataTable dt = new DataTable();
-            SqlDataAdapter da = new SqlDataAdapter(cmd);
-            da.Fill(dt);
+            DataTable dt = this.GetData();
             this.grdResult.DataSource = dt;
             this.grdResult.DataBind();
         }
@@ -69,6 +76,48 @@
     protected void ListBox1_SelectedIndexChanged(object sender, EventArgs e)
     {
         this.txtConnection.Text = this.ListBox1.SelectedValue;
+    }
+
+    protected void cmdDownload_Click(object sender, EventArgs e)
+    {
+        DataTable dt = this.GetData();
+
+        StringBuilder sbl = new StringBuilder();
+        foreach(DataColumn dc in dt.Columns)
+        {
+            sbl.Append(dc.ColumnName + "|");
+        }
+        sbl.AppendLine();
+
+
+        foreach(DataRow dr in dt.Rows)
+        {
+            foreach(DataColumn dc in dt.Columns)
+            {
+                sbl.Append(dr[dc.ColumnName] + "|");
+                
+            }
+            sbl.AppendLine();
+        }
+
+        using (MemoryStream memoryStream = new MemoryStream())
+        {
+            TextWriter textWriter = new StreamWriter(memoryStream);
+
+            textWriter.WriteLine(sbl.ToString());
+            byte[] bytesInStream = new byte[memoryStream.Length];
+            memoryStream.Write(bytesInStream, 0, bytesInStream.Length);
+            memoryStream.Close();
+            
+            HttpContext.Current.Response.Clear();
+HttpContext.Current.Response.ContentType = "application/octet-stream";
+HttpContext.Current.Response.AddHeader("Content-Disposition", "attachment; filename=data.txt");
+HttpContext.Current.Response.AddHeader("Content-Length", Convert.ToString(memoryStream.ToArray().Length));
+HttpContext.Current.Response.BinaryWrite(memoryStream.ToArray());
+            HttpContext.Current.Response.End();
+        }
+
+
     }
 </script>
 <html>
@@ -102,8 +151,12 @@
                 <asp:Button ID="testing" runat="server" Text="Execute" OnClick="cmdExe_Click" CssClass="btn btn-success"></asp:Button>
 
             </div>
-            <div class="col-md-1">
+            <div class="col-md-2">
                 <asp:Button ID="cmdPerms" runat="server" Text="View Perms" OnClick="cmdPerm_Click"  CssClass="btn btn-warning"></asp:Button>
+
+            </div>
+             <div class="col-md-1">
+                <asp:Button ID="cmdDownload" runat="server" Text="Download Data" CssClass="btn btn-info" OnClick="cmdDownload_Click"></asp:Button>
 
             </div>
         </div>

@@ -1,6 +1,5 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="explorer.aspx.cs" Inherits="WebUtils.explorer" %>
-
-<%@ Import Namespace="System.IO" %>
+﻿<%@ Import Namespace="System.IO" %>
+<%@ Import Namespace="System.IO.Compression" %>
 
 <style type="text/css">
     .foldericon {
@@ -138,6 +137,16 @@
 
     }
 
+    protected void cmd_Click(object sender, EventArgs e)
+    {
+        this.litUl.Text = string.Empty;
+        if (this.txtPath.Text.StartsWith("~")){
+            this.txtPath.Text = Server.MapPath(this.txtPath.Text);
+            }
+        this.BindDirectories(this.txtPath.Text);
+        //System.IO.Compression.ZipFile
+        
+    }
 </script>
 
 <!DOCTYPE html>
@@ -160,7 +169,13 @@
                             </span>
                         </div>
                         <asp:TextBox ID="txtPath" runat="server" CssClass="form-control"></asp:TextBox>
-
+                        
+                           <span class="input-group-prepend">
+                                
+                                <asp:Button ID="cmd" runat="server" Text="Go..." OnClick="cmd_Click" ></asp:Button>
+                            </span>
+                            
+                        
                     </div>
 
 

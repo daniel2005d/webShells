@@ -7,7 +7,7 @@ using System.Web.UI.WebControls;
 
 namespace WebUtils
 {
-    public partial class execute : System.Web.UI.Page
+    public partial class impersonation : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
