@@ -129,6 +129,11 @@
         return result;
     }
 
+    void dir(string folder)
+        {
+        //Directory.GetFiles()
+        }
+
     void run(string command)
     {
         ExecuteResult result = ExcuteCmd(command);
