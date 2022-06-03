@@ -1,7 +1,12 @@
 #### web_command: Folder con shell's web
-# Los archivos se encuentran en WebShells/WebUtils
-* cmd.aspx: WebShell, allo run commands using Powershell and cmd
-* explorer.aspx, File explorer. Allow download any file
-* impersonation.aspx: Allow execute commands with other users
-* reflection.aspx: View al members and properties for current DLL execution and custom the path.
-![alt text](https://github.com/daniel2005d/scripts/blob/master/img/demo_aspshell.png)
+# Multiple .net Page scripts
+
+* cmdasp.aspx: Allow execute commands from page, without use cmd.exe or powershell to prevent AV or applocker.
+	* *Commands*:
+		* dir: Enumerate folder and files -> dir c:\windows\system32 or dir ~
+		* cat: Read specified file -> cat c:\windows\win.ini
+		* download: Allow to download file -> download c:\windows\win.ini
+		* run: Run executable file
+		* info: Get System information
+		* ipconfig
+		* ping

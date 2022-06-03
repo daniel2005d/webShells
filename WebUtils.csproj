@@ -65,50 +65,18 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="demo.aspx.cs">
-      <DependentUpon>demo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="demo.aspx.designer.cs">
-      <DependentUpon>demo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="explorer.aspx.cs">
-      <DependentUpon>explorer.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="explorer.aspx.designer.cs">
-      <DependentUpon>explorer.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="impersonation.aspx.cs">
-      <DependentUpon>impersonation.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="impersonation.aspx.designer.cs">
-      <DependentUpon>impersonation.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="cmdasp.aspx" />
-    <Content Include="demo.aspx" />
     <Content Include="explorer.aspx" />
     <Content Include="impersonation.aspx" />
-    <Content Include="mimikatz.aspx" />
     <Content Include="php_cmd.php" />
-    <Content Include="reflection.aspx" />
-    <Content Include="reverse.aspx" />
+    <Content Include="powershell.aspx" />
     <Content Include="sqlquery.aspx" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="web.config" />
     <Content Include="app.config" />
-    <None Include="packages.config" />
-    <None Include="web.Debug.config">
-      <DependentUpon>web.config</DependentUpon>
-    </None>
-    <None Include="web.Release.config">
-      <DependentUpon>web.config</DependentUpon>
-    </None>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

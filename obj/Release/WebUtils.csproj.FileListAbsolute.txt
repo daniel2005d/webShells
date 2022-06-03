@@ -1,0 +1,10 @@
+D:\Codigo Fuente\webshells\bin\WebUtils.dll.config
+D:\Codigo Fuente\webshells\bin\WebUtils.dll
+D:\Codigo Fuente\webshells\bin\WebUtils.pdb
+D:\Codigo Fuente\webshells\bin\System.CodeDom.dll
+D:\Codigo Fuente\webshells\bin\System.CodeDom.xml
+D:\Codigo Fuente\webshells\obj\Release\WebUtils.csproj.AssemblyReference.cache
+D:\Codigo Fuente\webshells\obj\Release\WebUtils.csproj.CoreCompileInputs.cache
+D:\Codigo Fuente\webshells\obj\Release\WebUtils.csproj.CopyComplete
+D:\Codigo Fuente\webshells\obj\Release\WebUtils.dll
+D:\Codigo Fuente\webshells\obj\Release\WebUtils.pdb
